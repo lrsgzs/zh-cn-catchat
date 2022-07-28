@@ -16,7 +16,7 @@ flask run
 ```
 
 需要的库：
-
+```
 bleach==2.1.3
 certifi==2018.4.16
 chardet==3.0.4
@@ -44,3 +44,4 @@ sqlalchemy==1.2.10
 urllib3==1.23
 webencodings==0.5.1
 wtforms==2.2.1
+```
