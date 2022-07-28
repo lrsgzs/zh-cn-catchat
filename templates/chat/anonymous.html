@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block page_title %}隐身模式{% endblock %}
+
+{% block nav %}
+    <div class="ui top fixed borderless menu">
+        <a class="item catchat" href="{{ url_for('chat.home') }}" title="Go Back">
+            <img src="{{ url_for('static', filename='logo.png') }}">
+            <span>猫信 (隐身模式)</span>
+        </a>
+        <div class="right menu hide-on-mobile">
+            {% if current_user.is_authenticated %}
+                <div class="item">
+                    <button class="ui button orange basic" id="show-snippet-modal">创建片段</button>
+                </div>
+            {% else %}
+                <div class="item">
+                    <a class="ui primary button" href="{{ url_for('auth.login') }}">
+                        登入</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="pusher">
+        <div class="chat-box">
+            <div class="messages"></div>
+        </div>
+        <div class="input-area">
+            <div class="ui grid form">
+                <div class="ten wide column">
+                    <div class="field fluid message-box">
+                        {% if current_user.is_authenticated %}
+                            <img class="input-avatar" src="https://cravatar.cn/avatar/?d=mm">
+                            <textarea rows="2" id="message-textarea"
+                                      placeholder="在此处写下您的信息... Enter发送消息。"></textarea>
+                        {% else %}
+                            <div class="ui floating message">请 <a href="{{ url_for('auth.login') }}">登入</a> 或者
+                                <a
+                                        href="{{ url_for('auth.register') }}">注册</a> 后发送消息。
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        var socket = io('/anonymous');
+    </script>
+{% endblock %}

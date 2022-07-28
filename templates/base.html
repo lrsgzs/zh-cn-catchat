@@ -1,0 +1,178 @@
+<html>
+<head>
+    {% block head %}
+        <title>{% block title %}{% block page_title %}{% endblock %} - 猫信{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='semantic-ui/semantic.min.css') }}">
+    {% endblock %}
+</head>
+<body>
+
+<div class="ui labeled icon right vertical inverted demo menu sidebar">
+    <a class="item" href="{{ url_for('chat.anonymous') }}">
+        <i class="user secret icon"></i>
+        隐身模式
+    </a>
+    {% if current_user.is_authenticated %}
+        <a class="item" href="{{ url_for('chat.profile') }}">
+            <i class="setting icon"></i>
+            个人资料
+        </a>
+    {% endif %}
+    <a class="item" id="show-help-modal">
+        <i class="help icon"></i>
+        帮助
+    </a>
+    {% if current_user.is_authenticated %}
+        <a class="item" href="{{ url_for('auth.logout') }}">
+            <i class="power off icon"></i>
+            登出</a>
+    {% endif %}
+</div>
+
+{% block nav %}
+    <div class="ui top fixed borderless menu">
+        <a class="item catchat" href="{{ url_for('chat.home') }}">
+            <img src="{{ url_for('static', filename='logo.png') }}">
+            <span>猫信</span>
+        </a>
+        <div class="item">
+            <div class="ui label black basic" title="Online users">
+                <i class="user icon"></i> <span id="user-count">0</span> / {{ user_amount }}
+            </div>
+        </div>
+        <div class="right menu hide-on-mobile">
+            {% if current_user.is_authenticated %}
+                <div class="item">
+                    <button class="ui button orange basic" id="show-snippet-modal">创建包含代码的片段</button>
+                </div>
+            {% else %}
+                <div class="item">
+                    <a class="ui primary button" href="{{ url_for('auth.login') }}">
+                        登入</a>
+                </div>
+            {% endif %}
+            <a class="item" id="toggle-sidebar">
+                <i class="sidebar icon"></i>
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+<!-- Help Modal -->
+<div class="ui modal small help">
+    <div class="header">Markdown Help</div>
+    <div class="content">
+        <section class="modal--default__content" id="modal-body-region">
+            <div>
+                <div class="modal-content">
+                    <table class="ui celled striped table">
+                        <tbody>
+                        <tr>
+                            <td><strong>更大的</strong></td>
+                            <td>**更大的**</td>
+                        </tr>
+                        <tr>
+                            <td><i>斜体</i></td>
+                            <td>*斜体*</td>
+                        </tr>
+                        <tr>
+                            <td>标题</td>
+                            <td># H1 ## H2 ### H3</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <li>项目</li>
+                            </td>
+                            <td>* 项目</td>
+                        </tr>
+                        <tr>
+                            <td>块引用</td>
+                            <td>&gt; 块引用</td>
+                        </tr>
+                        <tr>
+                            <td><a href="/" target="_blank">链接</a></td>
+                            <td>[title](http://...)</td>
+                        </tr>
+                        <tr>
+                            <td>图片</td>
+                            <td>![alt](http://...)</td>
+                        </tr>
+                        <tr>
+                            <td><code>代码</code></td>
+                            <td>`code`</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="codehilite">
+                                    <pre>
+                                        <span></span>
+                                        <span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+                                        <span class="k">return</span> <span class="s2">"Hello World"</span>
+                                    </pre>
+                                </div>
+                            </td>
+                            <td style="line-height: 100%">```python <i style="color: rgba(0,0,0,0.5)">(shift+enter 换行)</i><br>
+                            def hello():<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;return "Hello World"<br>
+                            ```
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+            </div>
+        </section>
+    </div>
+    <div class="actions">
+        <button class="ui button cancel">关闭</button>
+    </div>
+</div>
+
+<!-- Snippet Modal -->
+<div class="ui modal small snippet">
+    <div class="header">创建代码或文本片段</div>
+    <div class="content">
+        <div class="ui form">
+            <textarea id="snippet-textarea" rows="20"></textarea>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui button cancel">取消</button>
+        <button class="ui button blue approve" id="snippet-button">创建</button>
+    </div>
+</div>
+
+<!-- Mobile message Modal -->
+<div id="mobile-new-message-modal" class="ui modal small">
+    <div class="content">
+        <div class="ui form">
+            <textarea id="mobile-message-textarea" rows="15"></textarea>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui button cancel">取消</button>
+        <button class="ui button orange approve" id="send-button">发送</button>
+    </div>
+</div>
+
+{% block content %}{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='semantic-ui/semantic.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {{ moment.include_moment(local_js=url_for('static', filename='js/moment-with-locales.min.js')) }}
+    <script type="text/javascript">
+        var root_url = "{{ url_for('chat.home') }}";
+        var messages_url = "{{ url_for('chat.get_messages') }}";
+        var current_user_id = {{ current_user.id|default(0) }};
+        var csrf_token = "{{ csrf_token() }}";
+    </script>
+{% endblock %}
+</body>
+</html>
